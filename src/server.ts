@@ -2,6 +2,9 @@ import http, { IncomingMessage, Server, ServerResponse } from 'http';
 import config from './config';
 import { RouteHandler, routes } from './helpers/RouteHandler';
 import './routes';
+import findDynamicRoute from './helpers/dynamicRouteHandler';
+
+
 
 const server: Server = http.createServer(
 	(req: IncomingMessage, res: ServerResponse)=>{
@@ -15,7 +18,13 @@ const server: Server = http.createServer(
 
 		if(handler){
 			handler(req, res);
-		}else{
+		}
+		else if(findDynamicRoute(method, path)){
+			const match = findDynamicRoute(method, path);
+			(req as any).params = match?.params;
+			match?.handler(req, res);
+		}
+		else{
 			res.writeHead(404, {'content-type': 'application/json'});
 			res.end(JSON.stringify({
 				success: false,
@@ -23,55 +32,6 @@ const server: Server = http.createServer(
 				path: path,
 			}));
 		}
-
-		//root route
-		// if(req.url == '/' && req.method == 'GET'){
-		// 	res.writeHead(200, { 'content-type': 'application/json'});
-		// 	res.end(JSON.stringify({
-		// 		message: 'Hello from node js with typescript...',
-		// 		path: req.url,
-		// 	}))
-		// };
-
-		//health route
-		// if(req.url == '/api' && req.method == 'GET'){
-		// 	res.writeHead(200, { 'content-type': 'application/json'});
-		// 	res.end(
-		// 		JSON.stringify({
-		// 			message: 'Health status ok',
-		// 			path: req.url,
-		// 		})
-		// 	)
-		// };
-
-		//post method
-		// if(req.url == '/api/users' && req.method == 'POST'){
-		// 	// const user = {
-		// 	// 	id: 1,
-		// 	// 	name: 'alice',
-		// 	// };
-
-		// 	// res.writeHead(200, { 'content-type': 'application/json'});
-		// 	// res.end(JSON.stringify(user))
-
-		// 	let body = '';
-		// 	// listen for data chunk
-		// 	req.on('data', (chunk)=>{
-		// 		body += chunk.toString();
-		// 	});
-
-		// 	req.on('end', ()=>{
-		// 		try{
-		// 			const parseBody = JSON.parse(body);
-		// 			console.log(body);
-		// 			res.end(JSON.stringify(parseBody));
-		// 		}catch(err: any){
-		// 			console.log(err?.message);
-		// 		}
-		// 	});
-
-		// 	// res.end(JSON.stringify({message: 'processing...'}))
-		// };
 	}
 );
 
