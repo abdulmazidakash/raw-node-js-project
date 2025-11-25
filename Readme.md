@@ -1,4 +1,3 @@
-````md
 # 🚀 Raw Node.js + TypeScript Starter
 
 This project is a **minimal Node.js + TypeScript setup**, created manually (no framework).  
